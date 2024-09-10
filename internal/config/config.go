@@ -15,7 +15,7 @@ type Config struct {
 }
 
 type GrpcConfig struct {
-	Port    string        `yaml:"port"`
+	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
 }
 
@@ -31,7 +31,7 @@ func MustLoad() *Config {
 
 	err := cleanenv.ReadConfig(path, &cfg)
 	if err != nil {
-		panic("failed to read cfh" + err.Error())
+		panic("failed to read cfg" + err.Error())
 	}
 	return &cfg
 }
