@@ -1,0 +1,6 @@
+version: '3'
+
+tasks:
+  migrate:
+    desc: "Make database migrations"
+    cmd: go run ./cmd/makemigrations --storage-path=./storage/sso.db --migrations-path=./migrations

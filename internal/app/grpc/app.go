@@ -14,9 +14,9 @@ type App struct {
 	port       int
 }
 
-func New(logger *slog.Logger, port int) *App {
+func New(logger *slog.Logger, authService oauth.OAuth, port int) *App {
 	grpcServer := grpc.NewServer()
-	oauth.Register(grpcServer)
+	oauth.RegisterServer(grpcServer, authService)
 	return &App{
 		log:        logger,
 		grpcServer: grpcServer,
@@ -53,9 +53,7 @@ func (a *App) Run() error {
 func (a *App) Stop() {
 	const op = "grpcapp.stop"
 	a.log.With(
-		slog.String("operation", op)).Info("stopping grpc server",
-		slog.Int("port:", a.port),
-	)
+		slog.String("operation", op)).Info("stopping grpc server")
 	//stop incoming requests, wait for the end of current
 	a.grpcServer.GracefulStop()
 }

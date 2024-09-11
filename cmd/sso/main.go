@@ -7,6 +7,8 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -23,7 +25,15 @@ func main() {
 
 	application := app.New(logger, cfg.Grpc.Port, cfg.StoragePath, cfg.TokenExpire)
 
-	application.Server.MustRun()
+	go application.Server.MustRun()
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
+	stopSignal := <-shutdown
+
+	logger.Info("shutdown signal received", slog.String("signal", stopSignal.String()))
+	application.Server.Stop()
 }
 
 func initLogger(env string) *slog.Logger {
