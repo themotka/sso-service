@@ -36,6 +36,21 @@ func MustLoad() *Config {
 	return &cfg
 }
 
+func MustLoadWPath(path string) *Config {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		panic("config file does not exist: " + path)
+	}
+
+	var config Config
+
+	if err := cleanenv.ReadConfig(path, &config); err != nil {
+		panic("cannot read config: " + err.Error())
+	}
+
+	return &config
+
+}
+
 // main.go --config=./path...
 // CONFIG_PATH=./path/to/config/file.yaml main.go
 func getConfigPath() string {
