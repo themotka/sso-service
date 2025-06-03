@@ -6,6 +6,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	ssov1 "github.com/themotka/proto/gen/go/sso"
 	"github.com/themotka/sso-service/internal/services/oauth"
+	"github.com/themotka/sso-service/internal/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,11 +33,11 @@ func RegisterServer(gRPCServer *grpc.Server, oauth OAuth) {
 
 func (s *server) Register(ctx context.Context, request *ssov1.RegisterRequest) (*ssov1.RegisterResponse, error) {
 	if err := validateRegister(request); err != nil {
-		return nil, err //email, password
+		return nil, err
 	}
 	userId, err := s.oauth.Register(ctx, request.GetEmail(), request.GetPassword())
 	if err != nil {
-		if errors.Is(err, oauth.ErrUserExists) {
+		if errors.Is(err, storage.ErrUserAlreadyExists) {
 			return nil, status.Error(codes.AlreadyExists, err.Error())
 		}
 		return nil, status.Error(codes.Internal, "internal server error")
@@ -64,6 +65,7 @@ func (s *server) IsAdmin(ctx context.Context, request *ssov1.AdminRequest) (*sso
 	}
 	isAdmin, err := s.oauth.IsAdmin(ctx, request.GetUserId())
 	if err != nil {
+		// TODO: error handling
 		return nil, status.Error(codes.Internal, "internal server error")
 	}
 	return &ssov1.AdminResponse{IsAdmin: isAdmin}, nil
